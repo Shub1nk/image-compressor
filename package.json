@@ -17,6 +17,6 @@
   "scripts": {
     "start": "yarn clean && yarn compress",
     "compress": "node index",
-    "clean": "rm -rf ./result/*"
+    "clean": "rm -rf result"
   }
 }
