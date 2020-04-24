@@ -1,2 +1,2 @@
-# image-compresspr
+# image-compressor
 Инструмент для оптимизации картинок

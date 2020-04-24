@@ -1,0 +1,10 @@
+{
+  "name": "image-compressor",
+  "version": "0.0.0",
+  "description": "Инструмент для оптимизации картинок",
+  "main": "index.js",
+  "repository": "https://github.com/Shub1nk/image-compressor.git",
+  "author": "Nikolay Shubin <nashubin@alfabank.ru>",
+  "license": "MIT",
+  "private": true
+}
