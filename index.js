@@ -5,17 +5,6 @@ const sizeOf = require('image-size');
 const tinify = require("tinify");
 tinify.key = config.API_KEY;
 
-// TODO: завернуть в функцию ---------------
-const date = new Date()
-const day = date.getDate();
-const month = date.getMonth() + 1;
-const year = date.getFullYear();
-
-
-const dayUpdate = day < 10 ? `0${day}` : day;
-const monthUpdate = month < 10 ? `0${month}` : month;
-// -----------------------------------------
-
 fs.mkdir('./result', () => {
   // TODO: завернуть в рекурсию
   fs.readdir("./images", (err, pages) => {
@@ -31,15 +20,25 @@ fs.mkdir('./result', () => {
   
               // [страница]_[описание]_[размеры]_[common|desktop|mobile]_[дата].[формат]
               const source = tinify.fromFile(`./images/${page}/${device}/${file}`);
-              source.toFile(`./result/${page}_${file.split('.')[0]}_${width}x${height}_${device}_${dayUpdate}-${monthUpdate}-${year}.${type}`);
+              source.toFile(`./result/${page}_${file.split('.')[0]}_${width}x${height}_${device}_${getDate()}.${type}`);
             })
           })
         })
       })
     })
   });
-
 })
 
+/** Возвращает дату в формате DD-MM-YYYY */
+function getDate() {
+  const date = new Date();
+
+  return `${updateTime(date.getDate())}-${updateTime(date.getMonth() + 1)}-${date.getFullYear()}`;
+}
+
+/** Преобразует число или месяц в двухзначное число */
+function updateTime (num) {
+  return num < 10 ? `0${num}` : num;
+}
 
 
