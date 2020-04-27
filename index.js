@@ -16,6 +16,8 @@ function compressImage () {
 
   patchAggregator(START_DIRECORY);
 
+  console.log(`Total: ${patchsArr.length} images`)
+
   patchsArr.forEach(patch => {
     const { width, height, type } = sizeOf(patch);
     const [, , page, device, fileName] = patch.split('/');
@@ -32,11 +34,14 @@ function compressImage () {
 function patchAggregator (patch) {
   if (fs.lstatSync(patch).isDirectory()) {
     const essencies = fs.readdirSync(patch).filter(item => item !== '.DS_Store' && item !== '.gitkeep');
-    essencies.forEach(dir => {
-      if (!fs.lstatSync(`${patch}/${dir}`).isDirectory()) {
-        patchsArr.push(`${patch}/${dir}`)
+    essencies.forEach(essence => {
+      if (!fs.lstatSync(`${patch}/${essence}`).isDirectory()) {
+        const typeFile = `${patch}/${essence}`.split('.')[2];
+        if (typeFile === 'png' || typeFile === 'jpg') {
+          patchsArr.push(`${patch}/${essence}`)
+        }
       }
-      patchAggregator(`${patch}/${dir}`)
+      patchAggregator(`${patch}/${essence}`)
     });
   }
 }
