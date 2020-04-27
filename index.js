@@ -5,29 +5,41 @@ const sizeOf = require('image-size');
 const tinify = require("tinify");
 tinify.key = config.API_KEY;
 
-fs.mkdir('./result', () => {
-  // TODO: завернуть в рекурсию
-  fs.readdir("./images", (err, pages) => {
-    if (err) throw err;
-    pages.filter(page => page !== '.DS_Store' && page !== '.gitkeep').map(page => {
-      fs.readdir(`./images/${page}`, (err, devices) => {
-        if (err) throw err;
-        devices.filter(device => device !== '.DS_Store' && device !== '.gitkeep').map(device => {
-          fs.readdir(`./images/${page}/${device}`, (err, fileNames) => {
-            if (err) throw err;
-            fileNames.filter(fileName => fileName !== '.gitkeep').forEach(file => {
-              const { width, height, type } = sizeOf(`./images/${page}/${device}/${file}`);
+// Массив с путями до картинок
+const patchsArr = [];
+const START_DIRECORY = './images'
+
+fs.mkdir('./result', () => compressImage())
+
+/** Оптимизирует картинки используют сервис https://tinypng.com */
+function compressImage () {
+
+  patchAggregator(START_DIRECORY);
+
+  patchsArr.forEach(patch => {
+    const { width, height, type } = sizeOf(patch);
+    const [, , page, device, fileName] = patch.split('/');
   
-              // [страница]_[описание]_[размеры]_[common|desktop|mobile]_[дата].[формат]
-              const source = tinify.fromFile(`./images/${page}/${device}/${file}`);
-              source.toFile(`./result/${page}_${file.split('.')[0]}_${width}x${height}_${device}_${getDate()}.${type}`);
-            })
-          })
-        })
-      })
-    })
+    // [страница]_[описание]_[размеры]_[common|desktop|mobile]_[дата].[формат]
+    const source = tinify.fromFile(patch);
+    source.toFile(`./result/${page}_${fileName.split('.')[0]}_${width}x${height}_${device}_${getDate()}.${type}`)
+      .then(() => console.log(`file: ${patch} file is optimized`));
+    
   });
-})
+}
+
+/** Рекурсивно проходит вглубь папки и собирает путь до файла */
+function patchAggregator (patch) {
+  if (fs.lstatSync(patch).isDirectory()) {
+    const essencies = fs.readdirSync(patch).filter(item => item !== '.DS_Store' && item !== '.gitkeep');
+    essencies.forEach(dir => {
+      if (!fs.lstatSync(`${patch}/${dir}`).isDirectory()) {
+        patchsArr.push(`${patch}/${dir}`)
+      }
+      patchAggregator(`${patch}/${dir}`)
+    });
+  }
+}
 
 /** Возвращает дату в формате DD-MM-YYYY */
 function getDate() {
