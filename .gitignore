@@ -109,13 +109,17 @@ images/iis/common
 images/iis/desktop
 images/iis/mobile
 
+images/premium/common
+images/premium/desktop
+images/premium/mobile
+
 images/learn/common
 images/learn/desktop
 images/learn/mobile
 
-images/premium/common
-images/premium/desktop
-images/premium/mobile
+images/article/common
+images/article/desktop
+images/article/mobile
 
 .DS_Store
 key.json
