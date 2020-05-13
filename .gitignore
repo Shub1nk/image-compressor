@@ -121,5 +121,9 @@ images/article/common
 images/article/desktop
 images/article/mobile
 
+images/trading_account/common
+images/trading_account/desktop
+images/trading_account/mobile
+
 .DS_Store
 key.json
