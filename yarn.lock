@@ -569,6 +569,11 @@ prepend-http@^2.0.0:
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-2.0.0.tgz#e92434bfa5ea8c19f41cdfd401d741a3c819d897"
   integrity sha1-6SQ0v6XqjBn0HN/UAddBo8gZ2Jc=
 
+prettier@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.0.5.tgz#d6d56282455243f2f92cc1716692c08aa31522d4"
+  integrity sha512-7PtVymN48hGcO4fGjybyBSIWDsLU4H4XlvOHfq91pz9kkGlonzwTfYkaIEwiRg/dAJF9YlbsduBAgtYLi+8cFg==
+
 "promise-nodeify@>= 0.1":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/promise-nodeify/-/promise-nodeify-3.0.1.tgz#f0f5d9720ee9ec71dd2bfa92667be504c10229c2"
@@ -748,6 +753,11 @@ touch@^3.1.0:
   integrity sha512-WBx8Uy5TLtOSRtIq+M03/sKDrXCLHxwDcquSP2c43Le03/9serjQBIztjRz6FkJez9D/hleyAXTBGLwwZUw9lA==
   dependencies:
     nopt "~1.0.10"
+
+translit-rus-eng@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/translit-rus-eng/-/translit-rus-eng-1.0.8.tgz#29cdf9af3ccf2766a67cbe5f5dfe9f7091d823bf"
+  integrity sha512-SKhazosUuotBC9RNNHw18Jmofq2GUGdwLhuOgOWvMkQx4ApVmTvU472BnDwwEYFdW3TUtGTARBKz7jUFKyRtQg==
 
 type-fest@^0.8.1:
   version "0.8.1"

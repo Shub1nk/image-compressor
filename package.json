@@ -1,6 +1,6 @@
 {
   "name": "image-compressor",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Инструмент для оптимизации картинок",
   "main": "index.js",
   "repository": "https://github.com/Shub1nk/image-compressor.git",
@@ -9,7 +9,9 @@
   "private": true,
   "dependencies": {
     "image-size": "^0.8.3",
-    "tinify": "^1.6.0-beta.2"
+    "prettier": "^2.0.5",
+    "tinify": "^1.6.0-beta.2",
+    "translit-rus-eng": "^1.0.8"
   },
   "devDependencies": {
     "nodemon": "^2.0.3"
