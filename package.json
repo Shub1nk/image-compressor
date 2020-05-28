@@ -8,6 +8,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "glob": "^7.1.6",
     "image-size": "^0.8.3",
     "prettier": "^2.0.5",
     "tinify": "^1.6.0-beta.2",

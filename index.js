@@ -1,24 +1,28 @@
 const fs = require("fs");
-const config = require("./key.json");
 const sizeOf = require("image-size");
 const translitRusEng = require("translit-rus-eng");
-
 const tinify = require("tinify");
+const glob = require("glob");
+const { promisify } = require("util");
+const config = require("./key.json");
+
+const copyFileAsync = promisify(fs.copyFile);
 tinify.key = config.API_KEY;
 
-// Массив с путями до картинок
-const pathsArr = [];
-const START_DIRECTORY = "./images";
+makeIfNotExists("./result");
 
-fs.mkdir("./result", () => compressImage());
+glob("./images/**/*.png", {}, async (err, files) => {
+  await compressImage(files, ".png");
+});
+glob("./images/**/*.jpg", {}, async (err, files) => {
+  await compressImage(files, ".jpg");
+});
 
 /** Оптимизирует картинки используют сервис https://tinypng.com */
-function compressImage() {
-  pathAggregator(START_DIRECTORY);
+async function compressImage(filesArr, fileType) {
+  console.log(`Total: ${filesArr.length} ${fileType} images`);
 
-  console.log(`Total: ${pathsArr.length} images`);
-
-  pathsArr.forEach((path) => {
+  for await (let path of filesArr) {
     const { width, height, type } = sizeOf(path);
     const [, , page, device, fileName] = path.split("/");
 
@@ -44,35 +48,12 @@ function compressImage() {
 
     // result/[устройство]/[страница]_[описание]_[размеры]_[common|desktop|mobile]_[дата].[формат]
     const resultFilePath = `./result/${device}/${page}_${preparedFileName}_${width}x${height}_${device}_${getDate()}.${type}`;
-    const resultFileCompress = tinify.fromFile(path);
 
-    // Перенос файла с новым названием
-    fs.copyFile(path, resultFilePath, (err) => {
+    // Перенос файла с новым названием и его сжатие
+    fs.copyFile(path, resultFilePath, async (err) => {
       if (err) throw err;
-      console.log(`${path} was copied`);
-    });
 
-    // Сжатие изображений
-    resultFileCompress
-      .toFile(resultFilePath)
-      .then(() => console.log(`file: ${path} file is optimized`));
-  });
-}
-
-/** Рекурсивно проходит вглубь папки и собирает путь до файла */
-function pathAggregator(path) {
-  if (fs.lstatSync(path).isDirectory()) {
-    const essencies = fs
-      .readdirSync(path)
-      .filter((item) => item !== ".DS_Store" && item !== ".gitkeep");
-    essencies.forEach((essence) => {
-      if (!fs.lstatSync(`${path}/${essence}`).isDirectory()) {
-        const typeFile = `${path}/${essence}`.split(".")[2];
-        if (typeFile === "png" || typeFile === "jpg") {
-          pathsArr.push(`${path}/${essence}`);
-        }
-      }
-      pathAggregator(`${path}/${essence}`);
+      await tinify.fromFile(resultFilePath).toFile(resultFilePath);
     });
   }
 }
@@ -89,4 +70,10 @@ function getDate() {
 /** Преобразует число или месяц в двухзначное число */
 function updateTime(num) {
   return num < 10 ? `0${num}` : num;
+}
+
+function makeIfNotExists(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
 }
