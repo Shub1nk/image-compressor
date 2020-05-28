@@ -1,47 +1,59 @@
-const fs = require('fs');
-const config = require('./key.json');
-const sizeOf = require('image-size');
-
+const fs = require("fs");
+const sizeOf = require("image-size");
+const translitRusEng = require("translit-rus-eng");
 const tinify = require("tinify");
+const glob = require("glob");
+const { promisify } = require("util");
+const config = require("./key.json");
+
+const copyFileAsync = promisify(fs.copyFile);
 tinify.key = config.API_KEY;
 
-// Массив с путями до картинок
-const patchsArr = [];
-const START_DIRECORY = './images'
+makeIfNotExists("./result");
 
-fs.mkdir('./result', () => compressImage())
+glob("./images/**/*.png", {}, async (err, files) => {
+  await compressImage(files, ".png");
+});
+glob("./images/**/*.jpg", {}, async (err, files) => {
+  await compressImage(files, ".jpg");
+});
 
 /** Оптимизирует картинки используют сервис https://tinypng.com */
-function compressImage () {
+async function compressImage(filesArr, fileType) {
+  console.log(`Total: ${filesArr.length} ${fileType} images`);
 
-  patchAggregator(START_DIRECORY);
+  for await (let path of filesArr) {
+    const { width, height, type } = sizeOf(path);
+    const [, , page, device, fileName] = path.split("/");
 
-  console.log(`Total: ${patchsArr.length} images`)
+    /**
+     * Транслит имени файла
+     * replace после транслита необходим т.к. мино не переваривает эти символы
+     */
+    const preparedFileName = translitRusEng(fileName.split(".")[0], {
+      slug: true,
+      lowerCase: true,
+    })
+      .replace(/(_)/g, "-")
+      .replace(/ĭ/g, "i")
+      .replace(/%̆/g, "pc");
 
-  patchsArr.forEach(patch => {
-    const { width, height, type } = sizeOf(patch);
-    const [, , page, device, fileName] = patch.split('/');
-  
-    // [страница]_[описание]_[размеры]_[common|desktop|mobile]_[дата].[формат]
-    const source = tinify.fromFile(patch);
-    source.toFile(`./result/${page}_${fileName.split('.')[0]}_${width}x${height}_${device}_${getDate()}.${type}`)
-      .then(() => console.log(`file: ${patch} file is optimized`));
-    
-  });
-}
+    if (!fs.existsSync("./result/desktop")) {
+      fs.mkdirSync("./result/desktop");
+    }
 
-/** Рекурсивно проходит вглубь папки и собирает путь до файла */
-function patchAggregator (patch) {
-  if (fs.lstatSync(patch).isDirectory()) {
-    const essencies = fs.readdirSync(patch).filter(item => item !== '.DS_Store' && item !== '.gitkeep');
-    essencies.forEach(essence => {
-      if (!fs.lstatSync(`${patch}/${essence}`).isDirectory()) {
-        const typeFile = `${patch}/${essence}`.split('.')[2];
-        if (typeFile === 'png' || typeFile === 'jpg') {
-          patchsArr.push(`${patch}/${essence}`)
-        }
-      }
-      patchAggregator(`${patch}/${essence}`)
+    if (!fs.existsSync("./result/mobile")) {
+      fs.mkdirSync("./result/mobile");
+    }
+
+    // result/[устройство]/[страница]_[описание]_[размеры]_[common|desktop|mobile]_[дата].[формат]
+    const resultFilePath = `./result/${device}/${page}_${preparedFileName}_${width}x${height}_${device}_${getDate()}.${type}`;
+
+    // Перенос файла с новым названием и его сжатие
+    fs.copyFile(path, resultFilePath, async (err) => {
+      if (err) throw err;
+
+      await tinify.fromFile(resultFilePath).toFile(resultFilePath);
     });
   }
 }
@@ -50,12 +62,18 @@ function patchAggregator (patch) {
 function getDate() {
   const date = new Date();
 
-  return `${updateTime(date.getDate())}-${updateTime(date.getMonth() + 1)}-${date.getFullYear()}`;
+  return `${updateTime(date.getDate())}-${updateTime(
+    date.getMonth() + 1
+  )}-${date.getFullYear()}`;
 }
 
 /** Преобразует число или месяц в двухзначное число */
-function updateTime (num) {
+function updateTime(num) {
   return num < 10 ? `0${num}` : num;
 }
 
-
+function makeIfNotExists(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+}
